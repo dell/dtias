@@ -1,1 +1,5 @@
-# kickstart_my_ome
+# Kickstart My OME
+
+## Contributing
+
+For required coding style and structure guidelines see [CONTRIBUTING.md](./CONTRIBUTING.md)
