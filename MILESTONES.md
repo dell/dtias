@@ -36,3 +36,17 @@
 - A test phase for all the network stuff to make sure everything is actually up
 - Post installation health checks
 - Some sort of centralized logging
+
+## Problems
+
+- We don't IP the iDRACs out of the gate
+- Different orgs deploy different servers - we want to have a single cluster at a deployed location
+- Apptender - Amazon is building this
+
+## Updates
+
+- RESTAPI server that ties back to Ansible playbooks
+  - Add server
+  - Remove server
+- We need to do everything via RESTAPI
+- Build API server
