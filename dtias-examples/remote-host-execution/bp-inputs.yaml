@@ -1,0 +1,9 @@
+# to generate SSH key use ssh-keygen and then use ssh-copy-id to copy the public key to an online remote host
+private_key: |
+  -----BEGIN RSA PRIVATE KEY-----
+  RSA private key...
+  -----END RSA PRIVATE KEY-----
+ssh_server_host: 0.0.0.0
+ssh_server_username: root
+playbook_source_url: https://site.com/blueprint/example.zip
+playbook_relative_path: simple-playbook.yaml

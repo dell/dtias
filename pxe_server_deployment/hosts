@@ -1,0 +1,20 @@
+all:
+  hosts:
+    pxe_server:
+      ansible_become: true
+      ansible_connection: ssh
+      ansible_host: "{{ pxe_server_ip }}" 
+      ansible_ssh_user: "{{ pxe_server_ssh_user }}" 
+      ansible_ssh_private_key_file: "{{ ssh_private_key_file }}"
+  vars:
+    # Global variables (provided via inputs)
+    dhcp_subnet: "{{ dhcp_subnet }}"
+    dhcp_range_start: "{{ dhcp_range_start }}"
+    dhcp_range_end: "{{ dhcp_range_end }}"
+    gateway: "{{ gateway }}"
+    dns_server: "{{ dns_server }}"
+    iso_path: "{{ iso_path }}"
+    http_port: "{{ http_port }}"
+    httpd_container_image: "{{ httpd_container_image }}"
+    firewall_services: "{{ firewall_services }}"
+    target_hosts: "{{ target_hosts }}"

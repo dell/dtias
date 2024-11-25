@@ -1,0 +1,22 @@
+---
+- name: "Playing with Ansible and Git"
+  hosts: localhost
+  tasks:
+  - name: "change permission of ssh_key_file"
+    shell: "chmod 600 {{ ssh_private_key_file }}"
+  - debug: var=output.stdout_lines
+- name: "Playing with Ansible and Git"
+  hosts: webservers
+  become: yes  
+  tasks:
+  - name: Install ClamAV anti-virus package using yum
+    ansible.builtin.yum: # for rhel hosts
+      name: clamav
+      state: latest
+  - debug: var=output.stdout_lines
+
+  # - name: Install ClamAV anti-virus package using yum
+  #   ansible.builtin.apt: # for ubuntu hosts
+  #     name: clamav
+  #     state: latest
+  # - debug: var=output.stdout_lines

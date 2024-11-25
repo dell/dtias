@@ -1,13 +1,15 @@
 ---
+
 - name: Install Podman
   dnf:
-    name: podman
+    name: "podman{{ podman_version | default('') }}"
     state: present
   tags: podman
 
 - name: Verify Podman Installation
   command: podman --version
   register: podman_version_output
+  failed_when: podman_version_output.rc != 0
   changed_when: false
   tags: podman
 

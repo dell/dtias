@@ -1,0 +1,18 @@
+---
+- hosts: all
+  become: yes
+  become_user: root
+  tasks:
+    - name: Install ClamAV anti-virus package using yum
+      ansible.builtin.yum: # for RHEL hosts
+        name: clamav
+        state: latest
+# ---
+# - hosts: all
+#   become: yes
+#   become_user: root
+#   tasks:
+#     - name: Install ClamAV anti-virus package using apt
+#       ansible.builtin.apt: # for Ubuntu hosts
+#         name: clamav
+#         state: latest

@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Target IP address to search for
+TARGET_IP="{{ pxe_server_ip }}"
+
+# Iterate over all interfaces
+for iface in $(ip -o -4 addr show | awk '{print $2}'); do
+    # Get the IP address of the current interface
+    ip_addr=$(ip -o -4 addr show $iface | awk '{print $4}' | cut -d/ -f1)
+    
+    # Check if the IP matches the target IP
+    if [[ "$ip_addr" == "$TARGET_IP" ]]; then
+        echo "$iface"
+        exit 0
+    fi
+done
+
+# If no interface was found with the specified IP
+echo "No interface found with the IP address {{ pxe_server_ip }}"
+exit 1

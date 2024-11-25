@@ -1,0 +1,44 @@
+---
+# Main playbook to configure a PXE/Kickstart server on a Rocky Linux machine
+
+- name: Configure PXE/Kickstart Server
+  hosts: pxe_server     # Specifies the target PXE server from the inventory file
+  become: yes           # Enables privilege escalation (similar to 'sudo' in Linux) for tasks requiring root access
+  gather_facts: yes     # Collects information about the host(s), such as OS type, IP addresses, etc., before running any tasks
+
+  roles:
+    # Each 'role' below is a group of related tasks that configure specific components of the PXE server
+
+    - role: common       # 'common' role for general system setup, like updating packages and installing prerequisites
+      tags: common       # Allows you to run this role independently using 'ansible-playbook site.yml --tags "common"'
+
+    - role: podman       # 'podman' role to install and configure Podman, used for container management on the PXE server
+      tags: podman       # You can run just the Podman setup tasks with 'ansible-playbook site.yml --tags "podman"'
+
+    - role: http         # 'http' role to set up the HTTP server, which will host Kickstart and installation files
+      tags: http         # Allows you to run only the HTTP setup tasks with 'ansible-playbook site.yml --tags "http"'
+      vars:
+        http_port: "{{ http_port }}"               # Dynamically fetch HTTP port from blueprint input
+        httpd_container_image: "{{ httpd_container_image }}"  # Fetch HTTP container image from input
+
+    - role: dhcp         # 'dhcp' role to install and configure the DHCP server
+      tags: dhcp         # Allows you to run only the DHCP configuration tasks with 'ansible-playbook site.yml --tags "dhcp"'
+      vars:
+        dhcp_subnet: "{{ dhcp_subnet }}"           # Fetch subnet from blueprint input
+        dhcp_range_start: "{{ dhcp_range_start }}" # Fetch DHCP range start from input
+        dhcp_range_end: "{{ dhcp_range_end }}"     # Fetch DHCP range end from input
+        gateway: "{{ gateway }}"                   # Fetch gateway from input
+        dns_server: "{{ dns_server }}"             # Fetch DNS server from input
+
+    - role: tftp         # 'tftp' role to set up the TFTP server, which serves PXE boot files to client machines
+      tags: tftp         # Run only the TFTP tasks with 'ansible-playbook site.yml --tags "tftp"'
+      vars:
+        iso_path: "{{ iso_path }}"                 # Fetch ISO path from blueprint input
+
+  # Explanation:
+  # - The variables for each role are dynamically set using the blueprint inputs. For example:
+  #   - `http_port` and `httpd_container_image` are passed to the `http` role.
+  #   - `dhcp_subnet`, `dhcp_range_start`, `dhcp_range_end`, etc., are passed to the `dhcp` role.
+  #   - `iso_path` is passed to the `tftp` role.
+  # - Using dynamic variables makes the playbook flexible and reusable without manual modification.
+  

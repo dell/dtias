@@ -8,7 +8,7 @@ rootpw {{ root_password }}
 user --name={{ user_name }} --password={{ user_password }}
 
 # Network configuration
-network --bootproto=static --ip={{ ip_address }} --netmask={{ netmask }} --gateway={{ gateway }} --nameserver={{ dns }}
+network --bootproto=static --ip={{ ip_address }} --netmask={{ netmask }} --gateway={{ gateway }} --nameserver={{ dns_server }}
 
 # Partitioning
 clearpart --all --initlabel

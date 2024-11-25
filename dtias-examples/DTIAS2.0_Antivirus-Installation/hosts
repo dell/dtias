@@ -1,0 +1,8 @@
+webservers:
+  hosts:
+    web:
+      ansible_become: true
+      ansible_connection: ssh
+      ansible_host: remotehost_ipaddress
+      ansible_ssh_user: remotehost_username
+      ansible_ssh_private_key_file: "{{ inventory_dir }}/{{ ssh_private_key_file }}"

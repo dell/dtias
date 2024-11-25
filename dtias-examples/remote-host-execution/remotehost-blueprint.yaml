@@ -1,0 +1,60 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+# - https://cloudify.co/spec/cloudify/6.3.0/types.yaml
+  - http://fileserver-svc/data/.artifacts/types/types-6.3.0.yaml
+  - plugin:dtias-ansible-plugin
+
+inputs:
+  playbook_source_url:
+    type: string
+    default: https://site.com/blueprint/example.zip
+    description: URL to zip file containing playbook
+
+  playbook_relative_path:
+    type: string
+    default: simple-playbook.yaml
+    #default: antivirus-playbook.yaml
+    description: Relative path to playbook inside source the zip file
+
+  ssh_server_host:
+    type: string
+    default: 0.0.0.0
+
+  private_key:
+    type: string
+    description: SSH private key contents as string
+    default: { get_secret: ssh_private_key }
+
+  ssh_server_username:
+    type: string
+    default: root
+
+node_types:
+  runplay:
+    derived_from: cloudify.nodes.Compute
+    properties:
+      agent_config:
+        default:
+          install_method: none
+          user: { get_input: ssh_server_username }
+          key: { get_input: private_key }
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        start:
+          implementation: ansible.cloudify_ansible.tasks.run
+          inputs:
+            playbook_path:
+              default: { get_input: playbook_relative_path }
+            playbook_source_path:
+              default: { get_input: playbook_source_url }
+            debug_level:
+              default: 4
+            save_playbook:
+              default: false
+
+node_templates:
+  runplay:
+    type: runplay
+    properties:
+      ip: { get_input: ssh_server_host }
