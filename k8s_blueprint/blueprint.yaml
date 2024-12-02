@@ -1,0 +1,52 @@
+---
+
+tosca_definitions_version: cloudify_dsl_1_3
+
+description: >
+  A Cloudify blueprint for deploying and managing Kubernetes services.
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/5.1/types.yaml
+
+inputs:
+  master_ip:
+    description: IP address of the Kubernetes master node
+    type: string
+  kubeconfig:
+    description: Path to the kubeconfig file for authenticating with Kubernetes
+    type: string
+  service_definition:
+    description: Path to the Kubernetes service definition YAML file
+    type: string
+
+node_templates:
+
+  # Kubernetes cluster
+  k8s_master:
+    type: cloudify.nodes.kubernetes.Master
+    properties:
+      ip: { get_input: master_ip }
+      kubeconfig: { get_input: kubeconfig }
+
+  # Kubernetes service
+  k8s_service:
+    type: cloudify.nodes.kubernetes.Service
+    properties:
+      resource_definition:
+        file: { get_input: service_definition }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: k8s_master
+
+workflows:
+  deploy_k8s_service:
+    description: >
+      Custom workflow for deploying Kubernetes services.
+    mapping: cloudify.plugins.kubernetes.workflows.deploy
+
+outputs:
+  service_endpoint:
+    description: The endpoint of the deployed Kubernetes service
+    value: >
+      { get_attribute: [ k8s_service, endpoint ] }
+
