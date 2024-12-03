@@ -1,0 +1,82 @@
+---
+
+tosca_definitions_version: cloudify_dsl_1_5  # Update for Cloudify 7 compatibility
+imports:
+  - cloudify/types/types.yaml
+
+description: Blueprint to install and provision Kubernetes on a RedHat Linux server
+
+node_templates:
+  host:
+    type: cloudify.nodes.Compute
+    properties:
+      use_external_resource: false
+      agent_config:
+        install_method: remote
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: scripts/create_vm.yml
+          inputs:
+            playbook_path: scripts/create_vm.yml  # Script to create the VM
+        configure:
+          implementation: cloudify.interfaces.lifecycle.configure
+          inputs:
+            install_agent: true
+
+  kubernetes:
+    type: cloudify.nodes.Component  # Updated for Cloudify 7 compatibility
+    properties:
+      resource_config:
+        kubernetes_version: "1.22.0"
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        install:
+          implementation: scripts/install_kubernetes.sh
+          inputs:
+            host: { get_attribute: [ host, ip ] }
+            kubernetes_version: { get_property: [ SELF, resource_config, kubernetes_version ] }
+        start:
+          implementation: scripts/start_kubernetes.sh
+          inputs:
+            host: { get_attribute: [ host, ip ] }
+        stop:
+          implementation: scripts/stop_kubernetes.sh
+          inputs:
+            host: { get_attribute: [ host, ip ] }
+        delete:
+          implementation: scripts/delete_kubernetes.sh
+          inputs:
+            host: { get_attribute: [ host, ip ] }
+
+group_templates:
+  kubernetes_installation:
+    members: [ host, kubernetes ]
+    policies:
+      - type: cloudify.policies.scaling
+        properties:
+          default_instances: 1
+          min_instances: 1
+          max_instances: 1
+
+outputs:
+  kubernetes_master_ip:
+    description: The IP address of the Kubernetes master node
+    value: { get_attribute: [ kubernetes, master_ip ] }
+
+# Installation Script: install_kubernetes.sh
+#!/bin/bash
+#
+#set -e
+#
+# Update system and install required packages
+#yum update -y
+#yum install -y yum-utils device-mapper-persistent-data lvm2
+#yum install -y docker kubelet kubeadm kubectl --disableexcludes=kubernetes
+#
+# Enable and start Docker and kubelet services
+#systemctl enable docker.service
+#systemctl start docker.service
+#systemctl enable kubelet.service
+#systemctl start kubelet.service
+

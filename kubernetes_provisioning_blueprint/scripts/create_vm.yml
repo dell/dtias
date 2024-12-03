@@ -1,0 +1,6 @@
+---
+- name: Create VM
+  hosts: localhost
+  tasks:
+    - name: Create a new VM
+      command: echo "Creating VM..."  # Replace with actual VM creation command
