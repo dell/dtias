@@ -3,6 +3,7 @@
 tosca_definitions_version: cloudify_dsl_1_5  # Update for Cloudify 7 compatibility
 imports:
   - cloudify/types/types.yaml
+  - plugin:cloudify-kubernetes-plugin?version= >=2.7.0
 
 description: Blueprint to install and provision Kubernetes on a RedHat Linux server
 
@@ -28,7 +29,7 @@ node_templates:
     type: cloudify.nodes.Component  # Updated for Cloudify 7 compatibility
     properties:
       resource_config:
-        kubernetes_version: "1.22.0"
+        kubernetes_version: "1.31.1"
     interfaces:
       cloudify.interfaces.lifecycle:
         install:
