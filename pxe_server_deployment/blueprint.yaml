@@ -15,7 +15,7 @@ inputs:
 
   ssh_private_key_secret:
     type: string
-    description: SSH private key contents as string
+    description: This is the name of the key stored in DTIAS/Cloudify's key manager.
 
   pxe_server_ip:
     type: string
@@ -32,35 +32,35 @@ inputs:
     type: string
     description: "Subnet in CIDR format (e.g., 192.168.35.0/24)"
     constraints:
-      - pattern: "^(?:[0-9]{1,3}\\\\.){3}[0-9]{1,3}/(?:[0-9]|[1-2][0-9]|3[0-2])$"
+      - pattern: "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}/(?:[0-9]|[1-2][0-9]|3[0-2])$"
   
   dhcp_range_start:
     type: string
     description: "Start of the DHCP range (IPv4 format, e.g., 192.168.35.50)"
     constraints:
-      - pattern: "^(?:[0-9]{1,3}\\\\.){3}[0-9]{1,3}$"
+      - pattern: "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$"
 
   dhcp_range_end:
     type: string
     description: "End of the DHCP range (IPv4 format, e.g., 192.168.35.100)"
     constraints:
-      - pattern: "^(?:[0-9]{1,3}\\\\.){3}[0-9]{1,3}$"
+      - pattern: "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$"
 
   gateway:
     type: string
     description: "Default gateway (IPv4 format, e.g., 192.168.35.1)"
     constraints:
-      - pattern: "^(?:[0-9]{1,3}\\\\.){3}[0-9]{1,3}$"
+      - pattern: "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$"
 
   dns_server:
     type: string
     description: "DNS server address (IPv4 format, e.g., 8.8.8.8)"
     constraints:
-      - pattern: "^(?:[0-9]{1,3}\\\\.){3}[0-9]{1,3}$"
+      - pattern: "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$"
 
   iso_path:
     type: string
-    default: "/opt/Rocky-9.4-x86_64-minimal.iso"
+    default: "/opt/rocky.iso"
 
   http_port:
     type: string
@@ -110,3 +110,8 @@ node_templates:
                 httpd_container_image: { get_input: httpd_container_image }
                 target_hosts: { get_input: target_hosts }
                 firewall_services: { get_input: firewall_services }
+
+outputs:
+  ansible_output:
+    description: "Captures all Ansible output from the execution."
+    value: { get_attribute: [ ansible_playbook, ansible_output ] }

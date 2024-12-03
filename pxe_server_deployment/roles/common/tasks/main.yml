@@ -13,3 +13,32 @@
       - curl
     state: present
   tags: common
+
+- name: Ensure directory for ISO exists
+  file:
+    path: "{{ iso_path | dirname }}"
+    state: directory
+    mode: '0755'
+  tags: common
+
+- name: Download Rocky Linux ISO
+  get_url:
+    url: "https://download.rockylinux.org/pub/rocky/9/isos/x86_64/Rocky-9.5-x86_64-boot.iso"
+    dest: "{{ iso_path }}"
+    mode: '0644'
+  tags: common
+  when: not lookup('file', iso_path)
+
+- name: Verify ISO checksum
+  shell: |
+    sha256sum {{ iso_path }} | grep -q "{{ expected_checksum }}"
+  register: checksum_result
+  failed_when: checksum_result.rc != 0
+  tags: common
+  when: lookup('file', iso_path)  # Only verify if the ISO already exists
+
+- name: Fail if ISO checksum verification fails
+  fail:
+    msg: "The downloaded ISO file checksum does not match. Please verify the source URL and checksum."
+  when: checksum_result.failed
+  tags: common
