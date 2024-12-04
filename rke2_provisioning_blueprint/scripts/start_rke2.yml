@@ -1,0 +1,23 @@
+---
+- name: Start RKE2 Server
+  hosts: all
+  vars_files:
+    - group_vars/rke2_nodes.yml
+  tasks:
+    - name: Start RKE2 server
+      systemd:
+        name: rke2-server
+        state: started
+
+    - name: Set up kubeconfig for root user
+      copy:
+        src: /etc/rancher/rke2/rke2.yaml
+        dest: "{{ kubeconfig_path }}"
+        remote_src: yes
+
+    - name: Update kubeconfig to use localhost
+      replace:
+        path: "{{ kubeconfig_path }}"
+        regexp: '127.0.0.1'
+        replace: 'localhost'
+
