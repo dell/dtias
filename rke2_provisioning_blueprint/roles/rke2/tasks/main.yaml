@@ -40,7 +40,7 @@
   when: rke2_role == "agent"
 
 - name: Verify RKE2 service existence
-  ansible.builtin.shell: systemctl list-units | grep "rke2-{{ rke2_role }}"
+  ansible.builtin.shell: systemctl list-unit-files | grep "rke2-{{ rke2_role }}"
   register: rke2_service_check
   failed_when: rke2_service_check.stdout.find("rke2-" + rke2_role) == -1
 
