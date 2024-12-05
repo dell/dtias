@@ -3,5 +3,5 @@
   when: inventory_hostname == "ansible_host"
 
 - name: Configure other nodes to use Ansible host as DNS server
-  include_tasks: configure_dns_clients.yml
+  include_tasks: configure_dns_clients.yaml
   when: inventory_hostname != "ansible_host"
