@@ -5,6 +5,9 @@
     - name: ansible_password
       prompt: "Enter the SSH password for root"
       private: yes
+    - name: ansible_become_password
+      prompt: "Enter sudo password"
+      private: yes
   pre_tasks:
     - name: Clear existing SSH known hosts
       ansible.builtin.shell: >
@@ -19,6 +22,7 @@
         state: present
       delegate_to: localhost
       run_once: false
+      become: yes
 
     - name: Add target host to known_hosts by IP
       ansible.builtin.shell: |
@@ -36,7 +40,9 @@
       local_action:
         module: openssh_keypair
         path: "/root/.ssh/id_rsa"
+        state: present
       run_once: true
+      become: yes
 
   tasks:
     - name: Set Python interpreter explicitly
