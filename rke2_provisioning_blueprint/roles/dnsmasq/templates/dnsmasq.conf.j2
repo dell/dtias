@@ -1,6 +1,6 @@
 # dnsmasq configuration for local DNS
 no-resolv
-server=10.10.25.120
+server={{ ansible_default_ipv4.address }}  # Use Ansible host's primary interface
 server=8.8.8.8
 domain-needed
 bogus-priv
