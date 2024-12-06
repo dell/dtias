@@ -1,0 +1,17 @@
+- name: Backup existing resolv.conf
+  ansible.builtin.copy:
+    src: /etc/resolv.conf
+    dest: /etc/resolv.conf.bak
+    remote_src: yes
+    backup: yes
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+
+- name: Set Ansible host as DNS server
+  ansible.builtin.lineinfile:
+    path: /etc/resolv.conf
+    line: "nameserver {{ hostvars['ansible_host']['ansible_default_ipv4']['address'] }}"
+    state: present
+  become: true

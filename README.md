@@ -12,7 +12,6 @@ sudo dnf install ansible -y
 sudo dnf install -y python3-netaddr
 ansible-galaxy collection install containers.podman
 ```
-.
 
 ## Install DTIAS on Ubuntu 20.04
 

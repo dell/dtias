@@ -1,0 +1,22 @@
+- name: Allow RKE2 ports in the firewall
+  firewalld:
+    port: "{{ item }}"
+    zone: public
+    permanent: yes
+    state: enabled
+  with_items:
+    - 22/tcp   # SSH
+    - 443/tcp  # HTTPS
+    - 6443/tcp # Kubernetes API server
+    - 2379-2380/tcp # etcd server
+    - 10250-10255/tcp # Kubelet ports
+    - 8472/udp # VXLAN
+  become: true
+  notify:
+    - Reload firewalld
+
+
+- name: Reload firewalld
+  ansible.builtin.service:
+    name: firewalld
+    state: reloaded
