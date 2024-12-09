@@ -1,5 +1,9 @@
 import argparse
 import requests
+import urllib3
+
+# Disable SSL warnings globally
+urllib3.disable_warnings()
 
 
 def create_token(server_ip, tenant_id, username, password):
@@ -15,6 +19,7 @@ def create_token(server_ip, tenant_id, username, password):
     Returns:
         str: The ID token for authentication.
     """
+    # URL for token creation
     url = f"https://{server_ip}/identity/v1/tenant/{tenant_id}/token/create"
     headers = {"Content-Type": "application/json"}
     data = {
@@ -25,10 +30,12 @@ def create_token(server_ip, tenant_id, username, password):
     }
 
     try:
+        # Send POST request to obtain the token
         response = requests.post(url, headers=headers, json=data, verify=False)
         response.raise_for_status()
         return response.json().get("id_token")
     except requests.exceptions.RequestException as e:
+        # Handle request exceptions
         print(f"Error generating token: {e}")
         return None
 
@@ -39,12 +46,12 @@ def get_hardware_profiles(server_ip, id_token):
 
     Parameters:
         server_ip (str): The IP address of the DTIAS server.
-        tenant_id (str): The tenant ID (e.g., "default_tenant").
         id_token (str): The ID token for authentication.
 
     Returns:
         list: A list of hardware profiles.
     """
+    # URL for retrieving hardware profiles
     url = f"https://{server_ip}/api/v1/tenant/metalweaver/resources/hardwareprofiles"
     headers = {
         "accept": "application/json, text/plain, */*",
@@ -52,10 +59,12 @@ def get_hardware_profiles(server_ip, id_token):
     }
 
     try:
+        # Send GET request to retrieve hardware profiles
         response = requests.get(url, headers=headers, verify=False)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
+        # Handle request exceptions
         print(f"Error retrieving hardware profiles: {e}")
         return None
 
@@ -73,15 +82,19 @@ def apply_hardware_profile(server_ip, id_token, profile, servers):
     Returns:
         dict: Response from the server.
     """
-    url = f"https://{server_ip}/api/v1/tenant/Fulcrum/resources/hardwareprofiles"
+    # Extract profile name and construct URL
+    profile_name = profile['metadata']['name']
+    url = f"https://{server_ip}/api/v1/tenant/metalweaver/resources/hardwareprofiles/{profile_name}"
     headers = {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json+patch",
         "Authorization": f"Bearer {id_token}"
     }
+    # Define the payload for the PATCH request
     payload = {
+        "apiVersion": "mw.dell.com/v2",
         "kind": "HardwareProfile",
         "metadata": {
-            "name": profile['metadata']['name'],
+            "name": f"{profile_name}",
             "labels": {
                 "site": "gc"
             }
@@ -89,33 +102,38 @@ def apply_hardware_profile(server_ip, id_token, profile, servers):
         "spec": {
             "apply": True,
             "preview": False,
-            "server": profile['spec']['server'],
             "serverList": [{"name": server, "namespace": "metalweaver"} for server in servers]
         }
     }
 
+    # Print debugging information
     print(f"URL: {url}")
     print(f"Payload: {payload}")
 
     try:
-        response = requests.post(url, headers=headers, json=payload, verify=False)
+        # Send PATCH request to apply the hardware profile
+        response = requests.patch(url, headers=headers, json=payload, verify=False)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
+        # Handle request exceptions
         print(f"Error applying hardware profile: {e}")
         return None
 
 
 if __name__ == "__main__":
-    # Set up argparse
+    # Set up argparse for command-line argument parsing
     parser = argparse.ArgumentParser(description="Retrieve and apply hardware profiles.")
-    parser.add_argument("--server_ip", required=True, help="The IP address of the DTIAS server.")
+    parser.add_argument("--server_ip", default="172.21.0.215", required=True,
+                        help="The IP address of the DTIAS server.")
     parser.add_argument("--tenant_id", default="Fulcrum", help="The tenant ID (default: Fulcrum).")
-    parser.add_argument("--username", required=True, help="The username to authenticate with.")
+    parser.add_argument("--username", default="admin", required=True, help="The username to authenticate with.")
     parser.add_argument("--password", required=True, help="The password for the username.")
-    parser.add_argument("--profile_name", required=True, help="The name of the hardware profile.")
+    parser.add_argument("--profile_name", required=True,
+                        help="The name of the hardware profile.")
     parser.add_argument("--servers", required=True, help="Comma-separated list of server names.")
 
+    # Parse arguments
     args = parser.parse_args()
     server_list = [server.strip() for server in args.servers.split(",")]
 
@@ -131,12 +149,9 @@ if __name__ == "__main__":
         print("Failed to retrieve hardware profiles. Exiting...")
         exit(1)
 
-    # Step 3: Find the matching profile
+    # Step 3: Find the matching profile by name
     profiles_list = profiles.get("items", [])
-
-    # Find the matching profile by name
     selected_profile = next((p for p in profiles_list if p["metadata"]["name"] == args.profile_name), None)
-
     if not selected_profile:
         print(f"No hardware profile found with the name '{args.profile_name}'. Exiting...")
         exit(1)
