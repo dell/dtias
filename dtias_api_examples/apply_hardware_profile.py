@@ -1,3 +1,32 @@
+"""
+#### Synopsis
+Script to retrieve and apply hardware profiles on servers using DTIAS
+
+#### Description
+This script uses the DTIAS REST API to:
+1. Authenticate with the server and generate an authentication token.
+2. Retrieve the list of available hardware profiles.
+3. Apply a specified hardware profile to a given list of servers.
+
+The script disables SSL warnings for ease of use in environments with self-signed certificates. It requires the user 
+to specify the target hardware profile and the servers on which it should be applied.
+
+#### Python Example
+```bash
+python apply_hardware_profile.py --server_ip <ip addr> --tenant_id <tenant> --username <username> \
+--password <password> --profile_name <profile name> --servers <server1,server2>
+```
+
+where:
+
+- server_ip is the IP address of the DTIAS server.
+- tenant_id is the tenant name (default: Fulcrum).
+- username and password are the credentials for authentication.
+- profile_name specifies the name of the hardware profile to apply.
+
+servers is a comma-separated list of server names to apply the profile to.
+"""
+
 import argparse
 import requests
 import urllib3
@@ -124,10 +153,10 @@ def apply_hardware_profile(server_ip, id_token, profile, servers):
 if __name__ == "__main__":
     # Set up argparse for command-line argument parsing
     parser = argparse.ArgumentParser(description="Retrieve and apply hardware profiles.")
-    parser.add_argument("--server_ip", default="172.21.0.215", required=True,
+    parser.add_argument("--server_ip", required=True,
                         help="The IP address of the DTIAS server.")
     parser.add_argument("--tenant_id", default="Fulcrum", help="The tenant ID (default: Fulcrum).")
-    parser.add_argument("--username", default="admin", required=True, help="The username to authenticate with.")
+    parser.add_argument("--username", required=True, help="The username to authenticate with.")
     parser.add_argument("--password", required=True, help="The password for the username.")
     parser.add_argument("--profile_name", required=True,
                         help="The name of the hardware profile.")

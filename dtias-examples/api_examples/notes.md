@@ -1,3 +1,0 @@
-- You have to use Fulcrum as your client ID
-- You have to add the API version
-- What is the server namespace?

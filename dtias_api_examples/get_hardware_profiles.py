@@ -1,6 +1,29 @@
+"""
+#### Synopsis
+Script to retrieve hardware profiles from DTIAS
+
+#### Description
+This script uses the DTIAS REST API to retrieve a list of hardware profiles. It authenticates using a token obtained 
+via the API and retrieves the profiles associated with the specified tenant. 
+
+#### Python Example
+```bash
+python get_hardware_profiles.py --server_ip <ip addr> --tenant_id <tenant> --username <username> --password <password>
+```
+
+where:
+
+- server_ip is the IP address of the DTIAS server.
+- tenant_id is the tenant name (default: metalweaver).
+- username and password are the credentials for authentication.
+"""
+
 import argparse
 import requests
+import urllib3
 
+# Disable SSL warnings globally
+urllib3.disable_warnings()
 
 def create_token(server_ip, tenant_id, username, password):
     """

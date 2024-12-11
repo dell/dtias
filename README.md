@@ -1,10 +1,32 @@
-# DTIAS Examples
+# Dell TELCO Infrastructure Automation Suite (DTIAS) Examples
+
+- [Dell TELCO Infrastructure Automation Suite (DTIAS) Examples](#dell-telco-infrastructure-automation-suite-dtias-examples)
+  - [What is DTIAS?](#what-is-dtias)
+  - [About This Repository](#about-this-repository)
+  - [Useful Links](#useful-links)
+  - [Contributing](#contributing)
+  - [DTIAS Installation](#dtias-installation)
+  - [Install DTIAS on Ubuntu 20.04](#install-dtias-on-ubuntu-2004)
+  - [Install DTIAS on RHEL](#install-dtias-on-rhel)
+
+## What is DTIAS?
+
+DTIAS is designed to handle environments with large numbers of heterogenous servers. You don't need to be a TELCO to use it, but this is a core problem TELCOs face. DTIAS supports both HPE and Dell and has the ability to perform full lifecycle management of the servers. It has built in functionality to take a server from bare metal to with a few clicks standardized BIOS settings, up to date firmware, and a deployed and configured operating system. 
+
+## About This Repository
+
+This repository is dedicated to demonstrating the capabilities of Dell DTIAS. It has [API usage examples](./dtias_api_examples/) which show off how to control DTIAS through the API and a [blueprint repository](./blueprints/) with a host of useful, prebuilt, blueprints you can deploy.
+
+## Useful Links
+
+- [DTIAS REST API Documentation](https://developer.dell.com/apis/7ce7d11a-ff9c-47cc-b958-bd30dc9770f0/versions/2.1.0/docs/introduction.md)
+  - Note: DTIAS has recently merged with Cloudify. If you notice discrepancies in the API documentation feel free to open a ticket on this repository.
 
 ## Contributing
 
 For required coding style and structure guidelines see [CONTRIBUTING.md](./CONTRIBUTING.md)
 
-## Installation
+## DTIAS Installation
 
 ```bash
 sudo dnf install epel-release -y
