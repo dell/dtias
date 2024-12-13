@@ -1,4 +1,3 @@
 # RKE2 agent (worker) configuration
 server: "https://{{ groups['masters'][0] }}:9345"
-token: "RANDOM-TOKEN"
 node-name: "{{ inventory_hostname }}"
