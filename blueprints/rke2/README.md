@@ -1,63 +1,158 @@
-# RKE2 Provisioning Blueprint for RedHat Linux
-
-## Overview
-This repository contains a Cloudify blueprint for installing and provisioning an RKE2 cluster on multiple RedHat Linux servers using Ansible. The blueprint automates the setup process, ensuring RKE2 is installed and properly configured across the target servers.
-
-## Directory Structure
+Build a Kubernetes cluster using RKE2 via Ansible
+=========
 ```
-rke2_provisioning_blueprint/
-├── blueprint.yaml                  # The main blueprint file (e.g., rke2_rh_cloudify.yaml)
-├── scripts/
-│   ├── create_vm.yml               # Ansible playbook to create the VMs
-│   ├── install_rke2.yml            # Ansible playbook to install RKE2
-│   ├── start_rke2.yml              # Ansible playbook to start RKE2 services
-│   ├── stop_rke2.yml               # Ansible playbook to stop RKE2 services
-│   └── delete_rke2.yml             # Ansible playbook to delete/uninstall RKE2
-├── hosts                           # Ansible inventory file listing all target hosts
-├── group_vars/
-│   └── rke2_nodes.yml              # Ansible group variables for the RKE2 nodes
-└── README.md                       # Documentation on how to use the blueprint
+               ,        ,  _______________________________
+   ,-----------|'------'|  |                             |
+  /.           '-'    |-'  |_____________________________|
+ |/|             |    |
+   |   .________.'----'    _______________________________
+   |  ||        |  ||      |                             |
+   \__|'        \__|'      |_____________________________|
+
+|‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|
+|________________________________________________________|
+
+|‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|
+|________________________________________________________|
 ```
 
-## Prerequisites
-- Cloudify Manager (version 7 or later)
-- RedHat Linux servers with sudo privileges
-- Ansible installed for running the playbooks
+Unofficial Rancher Government Repository
+---------
 
-## Instructions
+Support: Please note that the code provided in this repository is not supported under any official support subscriptions. While we strive to ensure the quality and functionality of our code, we provide it on an "as-is" basis and make no guarantees regarding its performance.
 
-1. **Upload the Blueprint**
-   Upload the blueprint to your Cloudify Manager:
-   ```sh
-   cfy blueprints upload -b rke2_blueprint blueprint.yaml
-   ```
+Issues: We understand that issues may arise, and while we do not offer formal support, we will address reported issues on a "best effort" basis. We encourage users to report any problems or bugs they encounter, and we will do our best to address them in a timely manner.
 
-2. **Create a Deployment**
-   Create a deployment from the uploaded blueprint:
-   ```sh
-   cfy deployments create -b rke2_blueprint rke2_deployment
-   ```
+Contributions: Contributions to this repository are welcome! If you have improvements or fixes, please feel free to submit a pull request. We appreciate your efforts to improve the quality and effectiveness of this code.
 
-3. **Install the Deployment**
-   Install the deployment to provision the RKE2 cluster:
-   ```sh
-   cfy executions start -d rke2_deployment install
-   ```
+Thank you for your understanding and cooperation.
 
-## Scripts Overview
-- **create_vm.yml**: Ansible playbook for creating the virtual machines.
-- **install_rke2.yml**: Ansible playbook to install RKE2 components and configure services.
-- **start_rke2.yml**: Playbook to start RKE2 services and set up kubeconfig.
-- **stop_rke2.yml**: Playbook to stop RKE2 services.
-- **delete_rke2.yml**: Playbook to delete RKE2 components and clean up all related files.
+Ansible RKE2 (RKE Government) Playbook
+---------
+[![LINT](https://github.com/rancherfederal/rke2-ansible/actions/workflows/ci.yml/badge.svg)](https://github.com/rancherfederal/rke2-ansible/actions/workflows/ci.yml)
 
-## Outputs
-- The IP address of the RKE2 master node is available as an output (`rke2_master_ip`).
+RKE2, also known as RKE Government, is Rancher's next-generation Kubernetes distribution. This Ansible  playbook installs RKE2 for both the control plane and workers.
 
-## Notes
-- The default configuration sets up three RKE2 nodes, but this can be adjusted as needed.
-- The `kubectl` configuration is set up for the root user by default. Adjust as needed for other users.
+See the [docs](https://docs.rke2.io/) more information about [RKE Government](https://docs.rke2.io/).
 
-## Troubleshooting
-- Ensure that RKE2 services are running if any issues arise during provisioning.
-- Use `cfy logs download` to collect logs for debugging any Cloudify-specific issues.
+
+Platforms
+---------
+The RKE2 Ansible playbook supports all [RKE2 Supported Operating Systems](https://docs.rke2.io/install/requirements/#operating-systems)
+
+Supported Operating Systems:
+- SLES 15
+- Rocky 8 and 9
+- RedHat: 8 and 9
+- Ubuntu: 18, 20, and 22
+
+
+System requirements
+-------------------
+
+Deployment environment must have Ansible 2.9.0+
+
+Server and agent nodes must have passwordless SSH access
+
+Usage
+-----
+
+This playbook requires ansible.utils to run properly. Please see https://docs.ansible.com/ansible/latest/galaxy/user_guide.html#installing-a-collection-from-galaxy for more information about how to install this.
+
+```
+ansible-galaxy collection install -r requirements.yml
+```
+
+Create a new directory based on the `sample` directory within the `inventory` directory:
+
+```bash
+cp -R inventory/sample inventory/my-cluster
+```
+
+Second, edit `inventory/my-cluster/hosts.yaml` to match the system information gathered above. For example:
+
+```yaml
+rke2_cluster:
+  children:
+    rke2_servers:
+      hosts:
+        server1.example.com:
+    rke2_agents:
+      hosts:
+        agent1.example.com:
+        agent2.example.com:
+          node_labels:
+          - agent2Label=true"
+all:
+  vars:
+    install_rke2_version: v1.27.10+rke2r1
+```
+
+If needed, you can also edit `inventory/my-cluster/group_vars/rke2_agents.yml` and `inventory/my-cluster/group_vars/rke2_servers.yml` to match your environment.
+
+Start provisioning of the cluster using the following command:
+
+```bash
+ansible-playbook site.yml -i inventory/my-cluster/hosts.yml
+```
+
+Tarball Install/Air-Gap Install
+-------------------------------
+Added the neeed files to the [tarball_install](tarball_install/) directory.
+
+Further info can be found [here](tarball_install/README.md)
+
+
+Kubeconfig
+----------
+
+To get access to your **Kubernetes** cluster just
+
+```bash
+ssh ec2-user@kubernetes_api_server_host "sudo /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml get nodes"
+```
+
+Available configurations
+------------------------
+
+Variables should be set in `inventory/cluster/group_vars/rke2_agents.yml` and `inventory/cluster/group_vars/rke2_servers.yml`. See sample variables in `inventory/sample/group_vars` for reference.
+
+
+Uninstall RKE2
+---------------
+    Note: Uninstalling RKE2 deletes the cluster data and all of the scripts.
+The offical documentation for fully uninstalling the RKE2 cluster can be found in the [RKE2 Documentation](https://docs.rke2.io/install/uninstall/).
+
+If you used this module to created the cluster and RKE2 was installed via yum, then you can attempt to run this command to remove all cluster data and all RKE2 scripts.
+
+Replace `ec2-user` with your ansible user.
+```bash
+ansible -i 18.217.113.10, all -u ec2-user -a "/usr/bin/rke2-uninstall.sh"
+```
+
+If the tarball method was used then you can attempt to use the following command:
+```bash
+ansible -i 18.217.113.10, all -u ec2-user -a "/usr/local/bin/rke2-uninstall.sh"
+```
+On rare occasions you may have to run the uninstall commands a second time.
+
+Known Issues
+------------------
+- For RHEL8+ Operating Systems that have fapolicyd daemon running, rpm installation of RKE2 will fail due to a permission error while starting containerd. Users have to add the following rules file before installing RKE2. This is not an issue if the install.sh script is used to install RKE2. The RPM issue is expected to be fixed in later versions of RKE2.
+```bash
+cat <<-EOF >>"/etc/fapolicyd/rules.d/80-rke2.rules"
+allow perm=any all : dir=/var/lib/rancher/
+allow perm=any all : dir=/opt/cni/
+allow perm=any all : dir=/run/k3s/
+allow perm=any all : dir=/var/lib/kubelet/
+EOF
+
+systemctl restart fapolicyd
+
+```
+
+
+Author Information
+------------------
+
+[Rancher Government Solutions](https://ranchergovernment.com/)

@@ -1,7 +1,0 @@
-# RKE2 server (control plane) configuration
-write-kubeconfig-mode: "0644"
-node-name: "{{ inventory_hostname }}"
-token: "RANDOM-TOKEN"
-tls-san:
-  - "{{ ansible_host }}"
-  - "rke2-server.local"

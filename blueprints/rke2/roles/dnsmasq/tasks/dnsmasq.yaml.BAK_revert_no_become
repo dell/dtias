@@ -8,9 +8,8 @@
     path: /etc/hosts
     line: "{{ ansible_host }} {{ inventory_hostname }}"
     state: present
-  #register: hosts_added
   become: true
-  #this doesnt seem to work, but the one in bootstrap does...
+
 
 - name: Install dnsmasq
   ansible.builtin.yum:
@@ -25,20 +24,12 @@
     group: root
     mode: '0644'
 
-- name: Enable and start/restart dnsmasq service
+- name: Enable and start dnsmasq service
   ansible.builtin.service:
     name: dnsmasq
-    state: restarted
+    state: started
     enabled: true
   become: true
-
-#- name: Restart dnsmasq if new hosts added
-#  ansible.builtin.service:
-#    name: dnsmasq
-#    state: restarted
-#    enabled: true
-#  become: true
-#  when: hosts_added.changed  ###PROBLEMATIC BECAUSE ALREADY ADDING TO /etc/hosts in bootstrap
 
 - name: Allow DNS traffic in firewall
   ansible.builtin.firewalld:
