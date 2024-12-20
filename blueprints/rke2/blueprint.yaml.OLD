@@ -1,0 +1,66 @@
+---
+
+tosca_definitions_version: cloudify_dsl_1_5
+imports:
+  - cloudify/types/types.yaml
+
+description: Blueprint to install and provision RKE2 on multiple RedHat Linux servers using Ansible
+
+node_templates:
+  host:
+    type: cloudify.nodes.Compute
+    properties:
+      use_external_resource: false
+      agent_config:
+        install_method: remote
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: scripts/create_vm.yml
+          inputs:
+            playbook_path: scripts/create_vm.yml  # Script to create the VM
+            inventory: hosts                      # Path to the Ansible inventory file
+        configure:
+          implementation: cloudify.interfaces.lifecycle.configure
+          inputs:
+            install_agent: true
+
+  rke2:
+    type: cloudify.nodes.Component
+    properties:
+      resource_config:
+        rke2_version: "v1.22.0+rke2r1"
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        install:
+          implementation: scripts/install_rke2.yml
+          inputs:
+            inventory: hosts                      # Reference to Ansible inventory
+            rke2_version: { get_property: [ SELF, resource_config, rke2_version ] }
+        start:
+          implementation: scripts/start_rke2.yml
+          inputs:
+            inventory: hosts                      # Reference to Ansible inventory
+        stop:
+          implementation: scripts/stop_rke2.yml
+          inputs:
+            inventory: hosts                      # Reference to Ansible inventory
+        delete:
+          implementation: scripts/delete_rke2.yml
+          inputs:
+            inventory: hosts                      # Reference to Ansible inventory
+
+group_templates:
+  rke2_installation:
+    members: [ host, rke2 ]
+    policies:
+      - type: cloudify.policies.scaling
+        properties:
+          default_instances: 3  # Number of servers to be provisioned
+          min_instances: 1
+          max_instances: 5
+
+outputs:
+  rke2_master_ip:
+    description: The IP address of the RKE2 master node
+    value: { get_attribute: [ rke2, master_ip ] }
