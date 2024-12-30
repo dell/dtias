@@ -1,0 +1,22 @@
+---
+- name: Deploy RKE2 Servers
+  hosts: masters
+  become: true
+  roles:
+    - role: common
+    - role: firewall
+    - role: docker
+    - role: rke2
+  vars:
+    rke2_role: "server"
+
+- name: Deploy RKE2 Agents
+  hosts: workers
+  become: true
+  roles:
+    - role: common
+    - role: firewall
+    - role: docker
+    - role: rke2
+  vars:
+    rke2_role: "agent"

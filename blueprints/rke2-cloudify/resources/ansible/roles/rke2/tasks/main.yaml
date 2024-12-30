@@ -1,0 +1,73 @@
+- name: Download RKE2 install script
+  ansible.builtin.get_url:
+    url: https://get.rke2.io
+    dest: /tmp/install-rke2.sh
+    mode: '0755'
+    force: no
+
+- name: Install RKE2
+  ansible.builtin.shell: INSTALL_RKE2_TYPE={{ rke2_role }} /tmp/install-rke2.sh
+  register: rke2_install_result
+  failed_when: rke2_install_result.rc != 0
+
+- name: Verify RKE2 installation directory
+  ansible.builtin.stat:
+    path: /etc/rancher/rke2/
+  register: rke2_dir_check
+  failed_when: not rke2_dir_check.stat.exists
+
+- name: Set default RKE2 role
+  set_fact:
+    rke2_role: server
+  when: rke2_role is not defined
+
+- name: Debug RKE2 role
+  debug:
+    msg: "Configuring as {{ rke2_role }}"
+
+- name: Generate random token based on the machine id
+  set_fact:
+    server_node_token: "{{ ansible_machine_id | to_uuid }}"
+  delegate_to: localhost
+  delegate_facts: true
+  when: rke2_role == "server"
+
+- name: Configure RKE2 for servers
+  ansible.builtin.template:
+    src: rke2-server-config.yaml.j2
+    dest: /etc/rancher/rke2/config.yaml
+  become: true
+  when: rke2_role == "server"
+  vars:
+    token : "{{ hostvars['localhost']['server_node_token'] }}"
+
+- name: Configure RKE2 for agents
+  ansible.builtin.template:
+    src: rke2-agent-config.yaml.j2
+    dest: /etc/rancher/rke2/config.yaml
+  become: true
+  when: rke2_role == "agent"
+  vars:
+    token : "{{ hostvars['localhost']['server_node_token'] }}"
+
+- name: Verify RKE2 service existence
+  ansible.builtin.shell: systemctl list-unit-files | grep "rke2-{{ rke2_role }}"
+  register: rke2_service_check
+  failed_when: rke2_service_check.stdout.find("rke2-" + rke2_role) == -1
+
+- name: Enable and start RKE2 service
+  ansible.builtin.service:
+    name: "rke2-{{ rke2_role }}"
+    state: started
+    enabled: true
+
+- name: Verify RKE2 version
+  ansible.builtin.command: rke2 --version
+  register: rke2_version_check
+  failed_when: rke2_version_check.rc != 0
+
+- name: Verify and start the correct RKE2 service
+  ansible.builtin.service:
+    name: "rke2-{{ rke2_role }}"
+    state: started
+    enabled: true

@@ -1,0 +1,154 @@
+---
+tosca_definitions_version: cloudify_dsl_1_4
+
+imports:
+  - cloudify/types/types.yaml
+  - plugin:cloudify-ansible-plugin
+
+
+description: Blueprint to install and provision RKE2 on multiple RedHat Linux servers using Ansible
+
+inputs:
+  master_ip:
+    type: string
+    description: IP address of the master node
+  
+  agent_ip:
+    type: string
+    description: IP address of the agent node
+  
+#  rke2_version:
+#    type: string
+#    default: "v1.24.0"
+#    description: RKE2 version to install
+
+  ssh_user:
+    type: string
+    default: "root"
+    description: SSH username for connecting to nodes
+
+  ssh_private_key:
+    type: string
+    description: Path to the SSH private key
+
+node_templates:
+
+  rke2_cluster:
+    type: cloudify.nodes.ansible.Executor
+    properties:
+      ansible_env_vars:
+        ANSIBLE_HOST_KEY_CHECKING: "False"
+      sources:       
+        rke2_cluster:
+          children:
+            masters: # rke2_servers
+              hosts:
+                master:
+                  ansible_host: { get_input: master_ip }
+                  ansible_user: { get_input: ssh_user }
+                  ansible_ssh_private_key_file: { get_input: ssh_private_key }
+                  ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+            workers: # rke2_agents
+              hosts:
+                agent:
+                  ansible_host: { get_input: agent_ip }
+                  ansible_user: { get_input: ssh_user }
+                  ansible_ssh_private_key_file: { get_input: ssh_private_key }
+                  ansible_ssh_common_args: '-o StrictHostKeyChecking=no'            
+
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: ansible.cloudify_ansible.tasks.run
+          inputs:
+            site_yaml_path: resources/ansible/deploy-rke2.yaml
+            #run_data:
+            #  rke2_version: { get_input: rke2_version }
+            sources:        
+              rke2_cluster:
+                children:
+                  masters: #rke2_servers
+                    hosts:
+                      master:
+                        ansible_host: { get_input: master_ip }
+                        ansible_user: { get_input: ssh_user }
+                        ansible_ssh_private_key_file: { get_input: ssh_private_key }
+                        ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+                  workers: #rke2_agents
+                    hosts:
+                      agent:
+                        ansible_host: { get_input: agent_ip }
+                        ansible_user: { get_input: ssh_user }
+                        ansible_ssh_private_key_file: { get_input: ssh_private_key }
+                        ansible_ssh_common_args: '-o StrictHostKeyChecking=no'             
+
+        start:
+          implementation: ansible.cloudify_ansible.tasks.run
+          inputs:
+            site_yaml_path: resources/ansible/rke2-start.yaml
+            sources:        
+              rke2_cluster:
+                children:
+                  masters: #rke2_servers
+                    hosts:
+                      master:
+                        ansible_host: { get_input: master_ip }
+                        ansible_user: { get_input: ssh_user }
+                        ansible_ssh_private_key_file: { get_input: ssh_private_key }
+                        ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+                  workers: #rke2_agents
+                    hosts:
+                      agent:
+                        ansible_host: { get_input: agent_ip }
+                        ansible_user: { get_input: ssh_user }
+                        ansible_ssh_private_key_file: { get_input: ssh_private_key }
+                        ansible_ssh_common_args: '-o StrictHostKeyChecking=no'             
+            
+        stop:
+          implementation: ansible.cloudify_ansible.tasks.run
+          inputs:
+            site_yaml_path: resources/ansible/rke2-stop.yaml
+            sources:        
+              rke2_cluster:
+                children:
+                  masters: #rke2_servers
+                    hosts:
+                      master:
+                        ansible_host: { get_input: master_ip }
+                        ansible_user: { get_input: ssh_user }
+                        ansible_ssh_private_key_file: { get_input: ssh_private_key }
+                        ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+                  workers: #rke2_agents
+                    hosts:
+                      agent:
+                        ansible_host: { get_input: agent_ip }
+                        ansible_user: { get_input: ssh_user }
+                        ansible_ssh_private_key_file: { get_input: ssh_private_key }
+                        ansible_ssh_common_args: '-o StrictHostKeyChecking=no'             
+
+        delete:
+          implementation: ansible.cloudify_ansible.tasks.run
+          inputs:
+            site_yaml_path: resources/ansible/rke2-uninstall.yaml     
+            sources:        
+              rke2_cluster:
+                children:
+                  masters: #rke2_servers
+                    hosts:
+                      master:
+                        ansible_host: { get_input: master_ip }
+                        ansible_user: { get_input: ssh_user }
+                        ansible_ssh_private_key_file: { get_input: ssh_private_key }
+                        ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+                  workers: #rke2_agents
+                    hosts:
+                      agent:
+                        ansible_host: { get_input: agent_ip }
+                        ansible_user: { get_input: ssh_user }
+                        ansible_ssh_private_key_file: { get_input: ssh_private_key }
+                        ansible_ssh_common_args: '-o StrictHostKeyChecking=no'             
+
+# outputs:
+#   rke2_master_ip:
+#     description: The IP address of the RKE2 master node
+#     value: { get_attribute: master_ip  }

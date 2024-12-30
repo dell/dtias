@@ -1,0 +1,71 @@
+- name: Bootstrap SSH access
+  hosts: all
+  gather_facts: false
+  vars_prompt:
+    - name: ansible_password
+      prompt: "Enter the SSH password for root"
+      private: yes
+    - name: ansible_become_password
+      prompt: "Enter sudo password"
+      private: yes
+  pre_tasks:
+    - name: Clear existing SSH known hosts
+      ansible.builtin.shell: >
+        echo -n > ~/.ssh/known_hosts
+      delegate_to: localhost
+      run_once: true
+      
+    - name: Add target hostnames to /etc/hosts
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        line: "{{ ansible_host }} {{ inventory_hostname }}"
+        state: present
+      delegate_to: localhost
+      run_once: false
+      become: yes
+
+    - name: Add target host to known_hosts by IP
+      ansible.builtin.shell: |
+        ssh-keyscan -H {{ ansible_host }} >> ~/.ssh/known_hosts
+      delegate_to: localhost
+      run_once: false
+
+    - name: Add target host to known_hosts by hostname
+      ansible.builtin.shell: |
+        ssh-keyscan -H {{ inventory_hostname }} >> ~/.ssh/known_hosts
+      delegate_to: localhost
+      run_once: false
+
+    - name: Generate SSH key pair on Ansible control node if not present
+      local_action:
+        module: openssh_keypair
+        path: "/root/.ssh/id_rsa"
+        state: present
+      run_once: true
+      become: yes
+
+  tasks:
+    - name: Make sure python is installed
+      ansible.builtin.yum:
+        name: python3
+        state: present
+      become: true
+
+    - name: Set Python interpreter explicitly
+      set_fact:
+        ansible_python_interpreter: /usr/bin/python3
+
+    - name: Debug Python interpreter
+      debug:
+        msg: "Using Python interpreter: {{ ansible_python_interpreter }}"
+
+    - name: Copy SSH public key to target hosts
+      ansible.builtin.shell: |
+        sshpass -p '{{ ansible_password }}' ssh-copy-id -o StrictHostKeyChecking=no root@{{ ansible_host }}
+      delegate_to: localhost
+
+    - name: Gather facts on all hosts
+      ansible.builtin.setup:
+
+    - name: Test passwordless SSH on target hosts
+      ansible.builtin.command: whoami

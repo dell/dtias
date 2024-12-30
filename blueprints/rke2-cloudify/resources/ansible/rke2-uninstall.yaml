@@ -1,0 +1,37 @@
+- name: Uninstall RKE2 Cluster
+  hosts: all
+  become: yes
+  tasks:
+    - name: Run RKE2 uninstall script on servers
+      command: /usr/local/bin/rke2-uninstall.sh
+      when: inventory_hostname in groups['masters']
+
+    - name: Run RKE2 uninstall script on agents
+      command: /usr/local/bin/rke2-uninstall.sh
+      when: inventory_hostname in groups['workers']
+
+    - name: Remove RKE2 server service file
+      file:
+        path: /etc/systemd/system/rke2-server.service
+        state: absent
+      when: inventory_hostname in groups['masters']
+
+    - name: Remove RKE2 agent service file
+      file:
+        path: /etc/systemd/system/rke2-agent.service
+        state: absent
+      when: inventory_hostname in groups['workers']
+
+    - name: Reload systemd
+      systemd:
+        daemon_reload: yes
+
+    - name: Clean up RKE2 directories
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/rancher/rke2
+        - /var/lib/rancher/rke2
+        - /var/lib/kubelet
+        - /var/lib/rancher/rke2-agent

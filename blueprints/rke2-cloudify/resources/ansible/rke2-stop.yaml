@@ -1,0 +1,15 @@
+- name: Stop RKE2 Cluster
+  hosts: all
+  become: yes
+  tasks:
+    - name: Stop RKE2 server service
+      systemd:
+        name: rke2-server
+        state: stopped
+      when: inventory_hostname in groups['masters']
+
+    - name: Stop RKE2 agent service
+      systemd:
+        name: rke2-agent
+        state: stopped
+      when: inventory_hostname in groups['workers']

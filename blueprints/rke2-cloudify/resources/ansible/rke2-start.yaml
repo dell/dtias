@@ -1,0 +1,25 @@
+- name: Start RKE2 Cluster
+  hosts: all
+  become: yes
+  tasks:
+    - name: Start RKE2 server service
+      systemd:
+        name: rke2-server
+        state: started
+        enabled: yes
+      when: inventory_hostname in groups['masters']
+
+    - name: Start RKE2 agent service
+      systemd:
+        name: rke2-agent
+        state: started
+        enabled: yes
+      when: inventory_hostname in groups['workers']
+
+#    - name: Wait for nodes to be ready
+#      command: kubectl get nodes
+#      register: node_status
+#      until: node_status.rc == 0
+#      retries: 12
+#      delay: 10
+#      when: inventory_hostname == groups['masters'][0]

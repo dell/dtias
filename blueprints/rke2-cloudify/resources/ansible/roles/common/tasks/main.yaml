@@ -1,0 +1,35 @@
+- name: Update all packages
+  ansible.builtin.yum:
+    name: '*'
+    state: latest
+  become: true
+
+- name: Install basic tools
+  ansible.builtin.yum:
+    name:
+      - curl
+      - tar
+    state: present
+
+- name: Update /etc/hosts with rke2 servers hostname
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    line: "{{ hostvars[item].ansible_host }} {{ item }}"
+    state: present
+  loop: "{{ groups['rke2_cluster'] }}"
+  become: true
+
+- name: Ensure hostname matches inventory
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+  become: true
+
+- name: Update /etc/hosts with inventory hostname
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    line: "{{ ansible_host }} {{ inventory_hostname }}"
+    state: present
+  become: true
+
+
+

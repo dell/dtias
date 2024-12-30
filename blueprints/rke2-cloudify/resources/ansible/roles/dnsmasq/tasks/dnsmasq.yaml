@@ -1,0 +1,49 @@
+- name: Ensure hostname matches inventory
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+  become: true
+
+#- name: Update /etc/hosts with inventory hostname
+#  ansible.builtin.lineinfile:
+#    path: /etc/hosts
+#    line: "{{ ansible_host }} {{ inventory_hostname }}"
+#    state: present
+#  become: true
+
+- name: Generate DNS entries for rke2_servers
+  copy:
+    dest: /etc/dnsmasq.d/rke2_servers.conf
+    content: |
+      {% for host in groups['rke2_servers'] %}
+      address=/{{ hostvars[host]['ansible_hostname'] }}.local/{{ hostvars[host]['ansible_default_ipv4']['address'] }}
+      {% endfor %}
+  notify:
+    - Restart dnsmasq
+
+- name: Install dnsmasq
+  ansible.builtin.yum:
+    name: dnsmasq
+    state: present
+
+- name: Configure dnsmasq
+  ansible.builtin.template:
+    src: dnsmasq.conf.j2
+    dest: /etc/dnsmasq.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Enable and start dnsmasq service
+  ansible.builtin.service:
+    name: dnsmasq
+    state: started
+    enabled: true
+  become: true
+
+- name: Allow DNS traffic in firewall
+  ansible.builtin.firewalld:
+    port: 53/udp
+    permanent: true
+    state: enabled
+    immediate: true
+  become: true
