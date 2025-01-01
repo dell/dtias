@@ -64,7 +64,7 @@ def create_token(server_ip, tenant_id, username, password):
         print(f"Error: {e}")
         return None
 
-def get_metrics_data(server_ip, tenant_id, resource, id_token, metric_id=None, metrics_filter=None):
+def get_metrics_data(server_ip, resource, id_token, metric_id=None, metrics_filter=None):
     """
     Retrieves metrics data from the DTIAS server.
 
