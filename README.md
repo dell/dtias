@@ -21,6 +21,8 @@ This repository is dedicated to demonstrating the capabilities of Dell DTIAS. It
 
 - [DTIAS REST API Documentation](https://developer.dell.com/apis/7ce7d11a-ff9c-47cc-b958-bd30dc9770f0/versions/2.1.0/docs/introduction.md)
   - Note: DTIAS has recently merged with Cloudify. If you notice discrepancies in the API documentation feel free to open a ticket on this repository.
+- [Dell Telecom Infrastructure Automation Suite 2.1 SDK Guide](https://infohub.delltechnologies.com/en-us/t/dell-telecom-infrastructure-automation-suite-2-1-software-development-kit-guide/)
+- [Dell Telecom Infrastructure Automation Suite 2.1 Installation and Administration Guide](https://infohub.delltechnologies.com/en-us/l/dell-telecom-infrastructure-automation-suite-2-1-installation-and-administration-guide/preface-95/)
 
 ## Contributing
 
