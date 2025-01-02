@@ -1,0 +1,11 @@
+apiVersion: content.hauler.cattle.io/v1alpha1
+kind: Files
+metadata:
+  name: hauler-seeder-files
+spec:
+  files:
+# TODO since this is a LIE - using tarball from https://github.com/tayterz2/hauler-helm
+    - path: file:///home/git/harvester_auto_demo/registry.tar.gz
+      name: registry.tgz
+    - path: https://charts.jetstack.io/charts/cert-manager-v1.16.2.tgz
+      name: cert-manager.tgz

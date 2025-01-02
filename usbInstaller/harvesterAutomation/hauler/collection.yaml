@@ -1,0 +1,39 @@
+apiVersion: content.hauler.cattle.io/v1alpha1
+kind: Images
+metadata:
+  name: hauler-collection-images
+  annotations:
+    hauler.dev/platform: linux/amd64
+spec:
+  images:
+    - name: quay.io/argoproj/argocd:v2.13.0
+    - name: ghcr.io/dexidp/dex:v2.41.1
+    - name: public.ecr.aws/docker/library/redis:7.2.4-alpine
+    - name: boomstack/tetris:0.1.8
+    - name: library/nginx:1.27.3
+    - name: x11docker/xserver
+---
+apiVersion: content.hauler.cattle.io/v1alpha1
+kind: Charts
+metadata:
+  name: hauler-content-charts-example
+spec:
+  charts:
+    - name: argo-cd
+      repoURL: https://argoproj.github.io/argo-helm
+      version: 7.7.0
+    - name : tetris
+      repoURL: https://rancher.github.io/rodeo
+      version: 0.1.9
+    - name: rancher
+      repoURL: https://releases.rancher.com/server-charts/stable
+      version: v2.8.2
+---
+apiVersion: content.hauler.cattle.io/v1alpha1
+kind: Files
+metadata:
+  name: hauler-collection-files
+spec:
+  files:
+    - path: https://raw.githubusercontent.com/mviereck/x11docker/master/x11docker
+    - path: x11docker/xfce.tar
