@@ -1,3 +1,0 @@
----
-- name: Playbook for testing
-  import_playbook: playbooks/testing.yml

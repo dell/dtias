@@ -8,6 +8,7 @@
   - [DTIAS Installation](#dtias-installation)
   - [Install DTIAS on Ubuntu 20.04](#install-dtias-on-ubuntu-2004)
   - [Install DTIAS on RHEL](#install-dtias-on-rhel)
+  - [Building a DTIAS VM](#building-a-dtias-vm)
 
 ## What is DTIAS?
 
@@ -191,3 +192,7 @@ sudo bash -c "echo -e 'fs.inotify.max_user_watches = 1048576\nfs.inotify.max_use
 sudo bash -c "echo 'Cmnd_Alias BIN=/usr/bin/systemctl,/usr/sbin/lvm,/usr/bin/mkdir,/usr/bin/touch,/usr/bin/tee,/usr/bin/sed,/usr/bin/umount,/usr/bin/mount,/usr/bin/rmdir,/usr/sbin/mkfs.xfs,/usr/sbin/lvs,/usr/sbin/pvcreate,/usr/sbin/pvremove,/usr/sbin/vgcreate,/usr/sbin/vgdisplay,/usr/sbin/vgremove,/usr/sbin/lvcreate,/usr/sbin/lvremove,/usr/bin/awk,/usr/bin/chown,/usr/bin/chmod,/usr/bin/echo,/usr/bin/cat,/usr/bin/cp,/usr/bin/rm,/usr/bin/install,/bin/install,/bin/systemctl,/bin/mkdir,/bin/sed,/bin/umount,/bin/rmdir,/sbin/mkfs.xfs,/bin/chown,/bin/chmod,/bin/echo,/bin/cat,/bin/cp,/bin/rm,/usr/bin/yum,/bin/yum,/bin/sh' >> /etc/sudoers"
 
 ```
+
+## Building a DTIAS VM
+
+See [How to Build DTIAS VM](./BUILD_VM.md)
