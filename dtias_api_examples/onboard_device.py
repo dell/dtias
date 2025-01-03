@@ -87,6 +87,7 @@ if __name__ == "__main__":
     parser.add_argument("--resource_name", required=True, help="The name of the compute resource.")
     parser.add_argument("--resource_id", required=True, help="The ID of the compute resource.")
     parser.add_argument("--bmc_ip", required=True, help="IP address of the BMC.")
+    parser.add_argument("--site_id", required=True, help="The Site ID for the compute resource.")
 
     args = parser.parse_args()
 
@@ -122,7 +123,7 @@ if __name__ == "__main__":
             "ResourcePoolId": "rp_dp",
             "ResourceTypeId": "rt_compute_dp",
             "ResType": "COMPUTE",
-            "SiteId": "default_site",
+            "SiteId": args.site_id,
             "uState": "IDLE",
             "AdminState": "UNLOCKED",
             "UsageState": "IDLE",
