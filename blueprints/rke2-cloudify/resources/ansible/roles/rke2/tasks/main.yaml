@@ -71,3 +71,36 @@
     name: "rke2-{{ rke2_role }}"
     state: started
     enabled: true
+
+- name: Download helm
+  ansible.builtin.get_url:
+    url: https://get.helm.sh/helm-v3.16.4-linux-amd64.tar.gz
+    dest: /tmp/helm.tar.gz
+    mode: '0755'
+    force: no
+  when: rke2_role == "server"
+
+- name: Install helm
+  ansible.builtin.shell: tar -xvf /tmp/helm.tar.gz; install linux-amd64/helm /usr/local/bin/
+  register: helm_install_result
+  failed_when: helm_install_result.rc != 0
+  when: rke2_role == "server"
+
+- name: Create kube directory in root's home
+  file:
+    path: "/root/.kube"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  when: rke2_role == "server"
+
+- name: Copy rke2 config in the root kube config
+  copy:
+    src: /etc/rancher/rke2/rke2.yaml
+    dest: "/root/.kube/config"
+    owner: "root"
+    group: "root"
+    mode: '0600'
+    remote_src: yes 
+  when: rke2_role == "server"
