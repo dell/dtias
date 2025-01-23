@@ -1,27 +1,33 @@
-- name: Allow RKE2 ports in the firewall
-  firewalld:
-    port: "{{ item }}"
-    zone: public
-    permanent: yes
-    state: enabled
-  with_items:
-    - 22/tcp   # SSH
-    - 443/tcp  # HTTPS
-    - 6443/tcp # Kubernetes API server
-    - 2379-2380/tcp # etcd server
-    - 10250-10255/tcp # Kubelet ports
-    - 8472/udp # VXLAN
-    - 9345/tcp #RKE2 node reg
-    - 30000-32767/tcp #RKE2 node port range
-    - 2376/tcp #Docker daemon TLS port
-    - 8443/tcp #Rancher Webhook/NGINX
-    - 9443/tcp #Rancher Webhook
-  become: true
-  notify:
-    - Reload firewalld
-
-
-- name: Reload firewalld
-  ansible.builtin.service:
+# Removing firewalld due to conflicts with default networking
+# https://docs.rke2.io/known_issues#firewalld-conflicts-with-default-networking
+- name: Remove firewalld 
+  ansible.builtin.dnf:
     name: firewalld
-    state: reloaded
+    state: absent
+
+- name: Install nftables
+  ansible.builtin.dnf:
+    name: nftables
+    state: latest
+
+- name: Enable and start nftables service
+  ansible.builtin.systemd:
+    name: nftables
+    state: started
+    enabled: yes
+
+- name: Create nftables ruleset table for rke2
+  ansible.builtin.template:
+    src: rke2.nft.j2
+    dest: /etc/nftables/rke2.nft
+
+- name: Load nftables ruleset
+  ansible.builtin.command: nft -f /etc/nftables/rke2.nft
+
+- name: Save nftables ruleset
+  ansible.builtin.shell: |
+    nft list ruleset > /etc/sysconfig/nftables.conf
+
+- name: Display nftables ruleset
+  ansible.builtin.command: nft list ruleset
+  register: nft_status

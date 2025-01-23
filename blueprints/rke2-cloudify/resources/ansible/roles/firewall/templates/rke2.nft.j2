@@ -1,0 +1,18 @@
+# TODO: Update rules to apply to specific hosts
+
+table inet rke2 {
+    chain input {
+      type filter hook input priority 0;
+      
+      # Allow established connections
+      ct state established,related accept
+      # default
+      tcp dport 22 accept
+      tcp dport 443 accept
+      # Open required ports for RKE2
+      tcp dport { 6443, 9345, 10250, 2379, 2380, 2381 } accept
+      udp dport 8472 accept
+      #NodePort port range [ All rke2 nodes]
+      tcp dport 30000-32767 accept
+    }
+}
