@@ -1,0 +1,10 @@
+- name: copy the rancher installation script
+  copy:
+    src: install-rancher.sh
+    dest: /tmp/install-rancher.sh
+    mode: '0755'  # Set executable permissions
+  when: rke2_role == "server"
+
+- name: Install rancher
+  shell: /tmp/install-rancher.sh
+  when: rke2_role == "server"

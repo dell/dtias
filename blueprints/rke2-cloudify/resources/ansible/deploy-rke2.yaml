@@ -5,7 +5,9 @@
   roles:
     - role: common
     - role: firewall
+      tags: firewall
     - role: docker
+      tags: docker
     - role: rke2
   vars:
     rke2_role: "server"
@@ -16,7 +18,18 @@
   roles:
     - role: common
     - role: firewall
+      tags: firewall
     - role: docker
+      tags: docker
     - role: rke2
   vars:
     rke2_role: "agent"
+
+- name: Deploy rancher
+  hosts: masters
+  become: true
+  roles:
+    - role: rancher
+      tags: rancher
+  vars:
+    rke2_role: "server"
